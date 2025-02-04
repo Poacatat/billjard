@@ -1,0 +1,5 @@
+[
+    {"winner": "Alice", "loser": "Bob", "time": 123712398},
+    {"winner": "Bob", "loser": "Charlie"},
+    {"winner": "Alice", "loser": "Charlie"}
+]
