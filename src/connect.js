@@ -1,24 +1,25 @@
-import {getAuth, createUserWithEmaiAndPAssword} from "firebase/auth";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+//import { getMaxListeners } from "events";
+import { getAuth, signInWithEmailAndPassword,createUserWithEmailAndPassword } from "firebase/auth";
 
-var admin = require("firebase-admin");
 
-var serviceAccount = require("/secret.json");
+import app from "./firebase-config.js"
+import pkg from 'firebase-admin';
+//import { config } from "process";
+const { admin } = pkg;
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://biljard-elo-default-rtdb.firebaseio.com"
-})
+var url = 'http://localhost:5000/api'
 
-const auth = getAuth();
-const provider = new GoogleAuthProvider();
+
+const auth = getAuth(app);
+//const provider = new GoogleAuthProvider();
+
 
 
 async function new_player(username){
     try {
         const token = await auth.currentUser.getIdToken();
 
-        const response = await fetch('http://localhost/api/players/add', {
+        const response = await fetch(url + '/players/new', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -39,15 +40,18 @@ async function new_user(username, email, pwd){
         const result = await createUserWithEmailAndPassword(auth, email, pwd);
         const token = await result.user.getIdToken();
 
-        const response = await fetch('http://localhost/api/users/add', {
+        const response = await fetch(url + '/auth', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({token})
+            body: JSON.stringify({token, email})
         });
 
+
         const data = await response.json();
+        console.log("New player: ");
+        console.log(data)
         new_player(username)
     } catch (error){
         console.error('Error creating new user:', error);
@@ -57,15 +61,15 @@ async function new_user(username, email, pwd){
 
 async function login(email, pwd){
     try {
-        const result = await signInWithUserNameAndPassword(email, pwd);
+        const result = await signInWithEmailAndPassword(auth, email, pwd);
         const token = await result.user.getIdToken(); 
 
-        const response = await fetch('http://localhost:5000/api/auth', {
+        const response = await fetch(url + '/auth', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({token})
+            body: JSON.stringify({email, token})
         });
 
         const data = await response.json();
@@ -79,7 +83,7 @@ async function login(email, pwd){
 
 async function get_game_by_uid(uid) {
     try {
-        let response = await fetch('http://localhost:5000/api/games/get/' + uid);
+        let response = await fetch(url + '/games/get/' + uid);
         let data = await response.json();
         console.log(data);
     } catch (error) {
@@ -90,7 +94,7 @@ async function get_game_by_uid(uid) {
 
 async function get_game() {
     try {
-        let response = await fetch('http://localhost:5000/api/games/get');
+        let response = await fetch(url + '/games/get');
         let data = await response.json();
         console.log(data);
     } catch (error) {
@@ -100,17 +104,17 @@ async function get_game() {
 
 async function get_player_games(uid) {
     try {
-        let response = await fetch('http://localhost:5000/api/games/get/' +uid );
+        let response = await fetch(url + '/games/get/' +uid );
         let data = await response.json();
         console.log(data);
     } catch (error) {
-        console.error('Error fetching games:', error);
+        console.error('Error fetching player games:', error);
     }
 }
 
 async function add_game(players, winner, token) {
     try {
-        let response = await fetch('http://localhost:5000/api/games/add', {
+        let response = await fetch(url + '/games/add', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -128,10 +132,17 @@ async function add_game(players, winner, token) {
 
 async function get_player(uid) {
     try {
-        let response = await fetch('http://localhost:5000/api/players/get/' + uid);
+        let response = await fetch(url + '/players/get/' + uid);
         let data = await response.json();
         console.log(data);
     } catch (error) {
         console.error('Error fetching player:', error);
     }
 }
+
+
+
+new_user("Pdiddy","linda.bergstig@gmail.com", "password");
+login("linda.bergstig@gmail.com", "password")
+//add_game(())
+//get_game("")
