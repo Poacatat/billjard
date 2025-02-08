@@ -110,12 +110,18 @@ class EloTracker:
 
     #unsafe
     #do not us 
-    def process_match(match, history_path, elo_path):
-        matches = read_match_data(history_path)
-        matches.append(match)  
-        with open(history_path, "w") as file:
-            json.dump(matches, file, indent=4)
-        
-        players = read_player_data(elo_path)
+def process_match(match, history_path, elo_path):
+    matches = read_match_data(history_path)
+    matches.append(match)  
+    with open(history_path, "w") as file:
+        json.dump(matches, file, indent=4)
+    
+    players = read_player_data(elo_path)
+    
+    elo_tracker = EloTracker.new(player_data)
+    elo_tracker.process_matches(matches)
+
+    write_to_file(ELO_PATH, elo_tracker.players)
+    
 
 main()
